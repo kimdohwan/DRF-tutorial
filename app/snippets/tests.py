@@ -78,12 +78,12 @@ class SnippetCreateTest(APITestCase):
 
     def test_snippet_create_save_db(self):
         """
-        요청후 실제 DB에 잘 저장되어있는지, 필드값이 저장되는
+        요청후 실제 DB에 잘 저장되어있는지, 필드값이 저장되는지
         :return:
         """
         pass
 
-    def test_snippet_create_missing_code_r지aise_exception(self):
+    def test_snippet_create_missing_code_raise_exception(self):
         """
         'code'데이터가 주어지지 않을 경우 적절한 Exception이 발생하는지
         :return:
