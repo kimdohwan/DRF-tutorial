@@ -6,6 +6,10 @@ from rest_framework.views import APIView
 from ..models import Snippet
 from ..serializers import SnippetSerializer
 
+__all__ = (
+    'SnippetList',
+    'SnippetDetail',
+)
 
 class SnippetList(APIView):
     """
