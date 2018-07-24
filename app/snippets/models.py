@@ -1,7 +1,10 @@
+from django.conf import settings
 from django.db import models
 
 # Create your models here.
-from pygments.lexers import get_all_lexers
+from pygments import highlight
+from pygments.formatters.html import HtmlFormatter
+from pygments.lexers import get_all_lexers, get_lexer_by_name
 from pygments.styles import get_all_styles
 
 LEXERS = [item for item in get_all_lexers() if item[1]]
@@ -16,24 +19,22 @@ class Snippet(models.Model):
     linenos = models.BooleanField(default=False)
     language = models.CharField(choices=LANGUAGE_CHOICES, default='python', max_length=100)
     style = models.CharField(choices=STYLE_CHOICES, default='friendly', max_length=100)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
+    )
+    highlighted = models.TextField()
 
     class Meta:
         ordering = ('created',)
 
-    def create(self, validated_data):
-        """
-        검증한 데이터로 새 `Snippet` 인스턴스를 생성하여 리턴합니다.
-        """
-        return Snippet.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        """
-        검증한 데이터로 기존 `Snippet` 인스턴스를 업데이트한 후 리턴합니다.
-        """
-        instance.title = validated_data.get('title', instance.title)
-        instance.code = validated_data.get('code', instance.code)
-        instance.linenos = validated_data.get('linenos', instance.linenos)
-        instance.language = validated_data.get('language', instance.language)
-        instance.style = validated_data.get('style', instance.style)
-        instance.save()
-        return instance
+    def save(self, *args, **kwargs):
+        # 지정한 언어(language)에 댜한 분석기(lexer) 할당
+        lexer = get_lexer_by_name(self.language)
+        # 줄 표시 여부
+        linenos = 'table' if self.linenos else False
+        # self.title이 존재하면 options 에 'title'키를 할당
+        options = {'title': self.title} if self.title else False
+        # 위에서 지정한 여러변수들을 사용해서 formatter 객체 생성
+        formatter = HtmlFormatter(style=self.style, linenos=linenos, full=True, **options)
+        self.highlighted = highlight(self.code, lexer, formatter)
+        super().save(*args, **kwargs)

@@ -67,6 +67,7 @@ class SnippetListTest(APITestCase):
             list(Snippet.objects.order_by('-created').values_list('pk', flat=True))
         )
 
+
 # json 형식의 문자열
 # CREATE_DATA = '''{
 #     "code": "print('hello, world')"
@@ -145,4 +146,3 @@ class SnippetCreateTest(APITestCase):
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
