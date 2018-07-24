@@ -11,6 +11,7 @@ __all__ = (
     'SnippetDetail',
 )
 
+
 class SnippetList(APIView):
     """
     코드 조각을 모두 보여주거나 새 코드 조각을 만듭니다.
