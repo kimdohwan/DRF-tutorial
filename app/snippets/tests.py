@@ -76,6 +76,8 @@ class SnippetListTest(APITestCase):
 
 
 class SnippetCreateTest(APITestCase):
+    URL = '/snippets/generic_cbv/users/'
+
     def test_snippet_create_status_code(self):
         """
         201이 돌아오는지
@@ -89,7 +91,7 @@ class SnippetCreateTest(APITestCase):
         # )
 
         response = self.client.post(
-            '/snippets/django_view/snippets/',
+            self.URL,
             data={
                 'code': "print('hello, world')"
             },
@@ -112,7 +114,7 @@ class SnippetCreateTest(APITestCase):
         }
 
         response = self.client.post(
-            '/snippets/django_view/snippets/',
+            self.URL,
             data=snippet_data,
             format='json',
         )
@@ -141,7 +143,7 @@ class SnippetCreateTest(APITestCase):
             'style': 'monokai',
         }
         response = self.client.post(
-            '/snippets/django_view/snippets/',
+            self.URL,
             data=snippet_data,
             format='json',
         )
