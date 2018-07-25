@@ -1,7 +1,7 @@
 from rest_framework import generics, mixins, request
 
 from ..models import Snippet
-from ..serializers import SnippetSerializer
+from ..serializers import SnippetListSerializer
 
 __all__ = (
     'SnippetList',
@@ -13,7 +13,7 @@ class SnippetList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   generics.GenericAPIView, ):
     queryset = Snippet.objects.all()
-    serializer_class = SnippetSerializer
+    serializer_class = SnippetListSerializer
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -27,7 +27,7 @@ class SnippetDetail(mixins.RetrieveModelMixin,
                     mixins.DestroyModelMixin,
                     generics.GenericAPIView):
     queryset = Snippet.objects.all()
-    serializer_class = SnippetSerializer
+    serializer_class = SnippetListSerializer
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)

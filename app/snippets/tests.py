@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from .serializers import UserListSerializer
 from .models import Snippet
 
 User = get_user_model()
@@ -44,17 +45,18 @@ class SnippetListTest(APITestCase):
             username='testuser1',
         )
 
-        for i in range(random.randint(10, 100)):
+        for i in range(random.randint(10, 15)):
             Snippet.objects.create(
                 code=f'a = {i}',
                 owner=User.objects.get(username='testuser1')
             )
+        print(Snippet.objects.count())
         response = self.client.get(self.URL)
         data = json.loads(response.content)
 
         # response로 받은 JSON데이터의 길이와
         # Snippet테이블의 자료수(COUNT)가 같은지
-        self.assertEqual(len(data), Snippet.objects.count())
+        self.assertEqual(data['count'], Snippet.objects.count())
 
     def test_snippet_list_order_by_created_descending(self):
         """
@@ -65,28 +67,27 @@ class SnippetListTest(APITestCase):
             username='testuser1',
         )
 
-        for i in range(random.randint(5, 10)):
+        for i in range(random.randint(10, 15)):
             Snippet.objects.create(
                 code=f'a = {i}',
                 owner=User.objects.get(username='testuser1'),
             )
-        response = self.client.get(self.URL)
-        data = json.loads(response.content)
-        # snippets = Snippet.objects.order_by('-created')
-        #
-        # # response에 전달된 JSON string을 파싱한 Python 객체를 순회하며 'pk'값만 꺼냄
-        # data_pk_list = []
-        # for item in data:
-        #     data_pk_list.append(item['pk'])
-        #
-        # # Snippet.objects.order_by('-created') QuerySet을 순회하며 각 Snippet인스턴스의 pk값만 꺼냄
-        # snippets_pk_list = []
-        # for snippet in snippets:
-        #     snippets_pk_list.append(snippet.pk)
+
+        URL = '/snippets/generic_cbv/snippets/'
+        pk_list = []
+        while 1:
+            response = self.client.get(URL)
+            data = json.loads(response.content)
+            for user_data in data['results']:
+                pk_list.append(user_data['pk'])
+            if data['next']:
+                URL = data['next']
+            else:
+                break
 
         self.assertEqual(
             # JSON으로 전달받은 데이터에서 pk만 꺼낸 리스트
-            [item['pk'] for item in data],
+            pk_list,
             # DB에서 created역순으로 pk값만 가져온 QuerySet으로 만든 리스트
             list(Snippet.objects.order_by('-created').values_list('pk', flat=True))
         )
@@ -145,10 +146,14 @@ class SnippetCreateTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         data = json.loads(response.content)
 
-        # response로 받은 데이터와 Snippet생성시 사용한 데이터가 같은지 확인
-        for key in snippet_data:
-            self.assertEqual(data[key], snippet_data[key])
-        self.assertEqual(data['owner'], user.username)
+        check_field = ['title', 'linenos', 'language', 'style', ]
+        for field in check_field:
+            self.assertEqual(data[field], snippet_data[field])
+
+        self.assertEqual(
+            data['owner'],
+            UserListSerializer(user).data,
+        )
 
     def test_snippet_create_missing_code_raise_exception(self):
         """

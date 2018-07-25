@@ -11,6 +11,7 @@ LEXERS = [item for item in get_all_lexers() if item[1]]
 LANGUAGE_CHOICES = sorted([(item[1][0], item[0]) for item in LEXERS])
 STYLE_CHOICES = sorted((item, item) for item in get_all_styles())
 
+
 class Snippet(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=100, blank=True)
@@ -36,6 +37,6 @@ class Snippet(models.Model):
         # self.title이 존재하면 options 에 'title'키를 할당
         options = {'title': self.title} if self.title else {}
         # 위에서 지정한 여러변수들을 사용해서 formatter 객체 생성
-        formatter = HtmlFormatter(style=self.style, linenos=linenos, full=True, **options,)
+        formatter = HtmlFormatter(style=self.style, linenos=linenos, full=True, **options, )
         self.highlighted = highlight(self.code, lexer, formatter)
         super().save(*args, **kwargs)
